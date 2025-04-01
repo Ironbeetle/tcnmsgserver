@@ -6,14 +6,20 @@ import { Button } from '@/components/ui/button';
 
 type Member = {
     id: string;
+    created: string;  // Changed from Date to string
+    updated: string;  // Changed from Date to string
+    birthdate: string;  // Changed from Date to string
     first_name: string;
     last_name: string;
     t_number: string;
+    gender: string;
+    o_r_status: string;
+    house_number: string;
     community: string;
-    email?: string;
-    contact_number?: string;
+    contact_number: string;
+    option: string;
+    email: string | null;
 };
-
 function page(props: any) {
     let [activeTab, setActiveTab] = useState(1);
     let [activeTab2, setActiveTab2] = useState(1);
@@ -49,14 +55,56 @@ function page(props: any) {
     });
     const Textcompose = () => {
         const [message, setMessage] = useState('');
+        const [isSending, setIsSending] = useState(false);
+        const [sendingStatus, setSendingStatus] = useState<{
+            success?: string;
+            error?: string;
+        }>({});
 
-        const handleSubmit = (e: React.FormEvent) => {
+        const handleSubmit = async (e: React.FormEvent) => {
             e.preventDefault();
-            // Handle the SMS submission here
-            console.log({
-                recipients: selectedRecipients,
-                message: message
-            });
+            setIsSending(true);
+            setSendingStatus({});
+
+            try {
+                const response = await fetch('/api/send-sms', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        recipients: selectedRecipients,
+                        message: message
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to send SMS');
+                }
+
+                // Calculate success and failure counts
+                const successCount = data.results.filter((r: any) => r.success).length;
+                const failureCount = data.results.filter((r: any) => !r.success).length;
+
+                setSendingStatus({
+                    success: `Successfully sent ${successCount} messages${failureCount > 0 ? `, ${failureCount} failed` : ''}`
+                });
+
+                // Clear form on success
+                if (failureCount === 0) {
+                    setMessage('');
+                    setSelectedRecipients([]);
+                }
+
+            } catch (error: any) {
+                setSendingStatus({
+                    error: error.message || 'Failed to send SMS'
+                });
+            } finally {
+                setIsSending(false);
+            }
         };
 
         return (
@@ -64,7 +112,7 @@ function page(props: any) {
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
                         <label className="block text-sm font-medium text-gray-700">
-                            Recipients
+                            Recipients ({selectedRecipients.length})
                         </label>
                         <div className="border rounded-md p-2 max-h-32 overflow-y-auto">
                             {selectedRecipients.map((member) => (
@@ -94,28 +142,43 @@ function page(props: any) {
                             rows={4}
                             className="w-full rounded-md border border-gray-300 p-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                             placeholder="Type your message here..."
+                            maxLength={160}
                         />
                         <div className="text-right text-sm text-gray-500">
                             {message.length}/160 characters
                         </div>
                     </div>
 
+                    {sendingStatus.success && (
+                        <div className="p-2 bg-green-100 text-green-700 rounded">
+                            {sendingStatus.success}
+                        </div>
+                    )}
+
+                    {sendingStatus.error && (
+                        <div className="p-2 bg-red-100 text-red-700 rounded">
+                            {sendingStatus.error}
+                        </div>
+                    )}
+
                     <div className="flex justify-end space-x-2">
                         <Button 
                             variant="outline" 
                             type="button"
+                            disabled={isSending}
                             onClick={() => {
                                 setMessage('');
                                 setSelectedRecipients([]);
+                                setSendingStatus({});
                             }}
                         >
                             Clear
                         </Button>
                         <Button 
                             type="submit"
-                            disabled={!message.trim() || selectedRecipients.length === 0}
+                            disabled={!message.trim() || selectedRecipients.length === 0 || isSending}
                         >
-                            Send SMS
+                            {isSending ? 'Sending...' : 'Send SMS'}
                         </Button>
                     </div>
                 </form>
@@ -289,10 +352,24 @@ function page(props: any) {
         const [message, setMessage] = useState('');
         const [attachments, setAttachments] = useState<File[]>([]);
         const [isSending, setIsSending] = useState(false);
+        const [sendingStatus, setSendingStatus] = useState<{
+            success?: string;
+            error?: string;
+        }>({});
+
+        const handleAttachmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+            const files = Array.from(e.target.files || []);
+            setAttachments(prev => [...prev, ...files]);
+        };
+
+        const removeAttachment = (index: number) => {
+            setAttachments(prev => prev.filter((_, i) => i !== index));
+        };
 
         const handleSubmit = async (e: React.FormEvent) => {
             e.preventDefault();
             setIsSending(true);
+            setSendingStatus({});
 
             try {
                 const formData = new FormData();
@@ -308,44 +385,28 @@ function page(props: any) {
                     body: formData,
                 });
 
+                const data = await response.json();
+
                 if (!response.ok) {
-                    throw new Error('Failed to send email');
+                    throw new Error(data.error || 'Failed to send email');
                 }
+
+                setSendingStatus({
+                    success: 'Email sent successfully'
+                });
 
                 // Clear form on success
                 setSubject('');
                 setMessage('');
                 setSelectedRecipients([]);
                 setAttachments([]);
-                
-            } catch (error) {
-                console.error('Failed to send email:', error);
+
+            } catch (error: any) {
+                setSendingStatus({
+                    error: error.message || 'Failed to send email'
+                });
             } finally {
                 setIsSending(false);
-            }
-        };
-
-        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-        const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'application/pdf', 'application/msword'];
-
-        const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-            if (e.target.files) {
-                const files = Array.from(e.target.files);
-                
-                // Validate file size and type
-                const validFiles = files.filter(file => {
-                    if (file.size > MAX_FILE_SIZE) {
-                        alert(`File ${file.name} is too large. Maximum size is 5MB`);
-                        return false;
-                    }
-                    if (!ALLOWED_FILE_TYPES.includes(file.type)) {
-                        alert(`File ${file.name} is not an allowed file type`);
-                        return false;
-                    }
-                    return true;
-                });
-
-                setAttachments(validFiles);
             }
         };
 
@@ -354,7 +415,7 @@ function page(props: any) {
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
                         <label className="block text-sm font-medium text-gray-700">
-                            Recipients
+                            Recipients ({selectedRecipients.length})
                         </label>
                         <div className="border rounded-md p-2 max-h-32 overflow-y-auto">
                             {selectedRecipients.map((member) => (
@@ -407,20 +468,36 @@ function page(props: any) {
                         <input
                             type="file"
                             multiple
-                            onChange={handleFileChange}
-                            className="w-full text-sm text-gray-500
-                                file:mr-4 file:py-2 file:px-4
-                                file:rounded-md file:border-0
-                                file:text-sm file:font-semibold
-                                file:bg-blue-50 file:text-blue-700
-                                hover:file:bg-blue-100"
+                            onChange={handleAttachmentChange}
+                            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                         />
-                        {attachments.length > 0 && (
-                            <div className="mt-2 text-sm text-gray-500">
-                                Selected files: {attachments.map(file => file.name).join(', ')}
-                            </div>
-                        )}
+                        <div className="mt-2 space-y-2">
+                            {attachments.map((file, index) => (
+                                <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                    <span className="text-sm truncate">{file.name}</span>
+                                    <Button
+                                        onClick={() => removeAttachment(index)}
+                                        variant="ghost"
+                                        size="sm"
+                                    >
+                                        ✕
+                                    </Button>
+                                </div>
+                            ))}
+                        </div>
                     </div>
+
+                    {sendingStatus.success && (
+                        <div className="p-2 bg-green-100 text-green-700 rounded">
+                            {sendingStatus.success}
+                        </div>
+                    )}
+
+                    {sendingStatus.error && (
+                        <div className="p-2 bg-red-100 text-red-700 rounded">
+                            {sendingStatus.error}
+                        </div>
+                    )}
 
                     <div className="flex justify-end space-x-2">
                         <Button 
@@ -432,6 +509,7 @@ function page(props: any) {
                                 setMessage('');
                                 setSelectedRecipients([]);
                                 setAttachments([]);
+                                setSendingStatus({});
                             }}
                         >
                             Clear

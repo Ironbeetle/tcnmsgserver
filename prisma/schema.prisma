@@ -14,19 +14,20 @@ datasource db {
   schemas  = ["fnmemberlist", "msgmanager"]
 }
 model fnmember {
-  id           String   @id @default(uuid())
-  created      DateTime @default(now())
-  updated      DateTime @default(now()) @updatedAt
-  birthdate    DateTime @db.Date
-  first_name   String
-  last_name    String
-  t_number     String
-  gender       String
-  o_r_status   String  @default("false")
-  house_number String    @default("0")
-  community     String
+  id             String   @id @default(uuid())
+  created        DateTime @default(now())
+  updated        DateTime @default(now()) @updatedAt
+  birthdate      DateTime @db.Date
+  first_name     String
+  last_name      String
+  t_number       String
+  gender         String
+  o_r_status     String   @default("false")
+  house_number   String   @default("0")
+  community      String
   contact_number String
-  option       String   @default("none")
+  option         String   @default("none")
+  email          String?   @unique 
   @@schema("fnmemberlist")
 }
 // Staff Management
@@ -42,6 +43,18 @@ model User {
   password      String
   accounts      Account[]
   sessions      Session[]
+  @@schema("msgmanager")
+}
+
+model SmsLog {
+  id          String   @id @default(uuid())
+  created     DateTime @default(now())
+  message     String
+  recipients  String[]
+  status      String
+  messageIds  String[]
+  error       String?
+
   @@schema("msgmanager")
 }
 
@@ -80,5 +93,19 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+  @@schema("msgmanager")
+}
+
+model EmailLog {
+  id          String    @id @default(uuid())
+  created     DateTime  @default(now())
+  subject     String
+  message     String
+  recipients  String[]
+  status      String
+  messageId   String?
+  error       String?
+  attachments Json?     // Stores attachment metadata
+
   @@schema("msgmanager")
 }

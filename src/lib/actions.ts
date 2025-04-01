@@ -1,115 +1,161 @@
 'use server';
-import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
-import { itemSchema, userSchema } from '@/lib/validation';
-import { hash } from 'bcrypt';
 
-export async function getItems() {
-  try{
-    return prisma.fnmember.findMany({ orderBy: { id: 'desc' } });
-  }catch(e){
-    console.log(e);
-  }finally{
-    await prisma.$disconnect();
+import { revalidatePath } from 'next/cache';
+import prisma from '@/lib/prisma';
+import bcrypt from 'bcrypt';
+
+export async function getUsers() {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        f_name: true,
+        l_name: true,
+        email: true,
+        role: true,
+      }
+    });
+    return users;
+  } catch (error) {
+    throw new Error('Failed to fetch users');
+  }
+}
+
+export async function createUser(formData: FormData) {
+  const f_name = formData.get('f_name') as string;
+  const l_name = formData.get('l_name') as string;
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+  const role = formData.get('role') as string;
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await prisma.user.create({
+      data: {
+        f_name,
+        l_name,
+        email,
+        password: hashedPassword,
+        role,
+      },
+    });
+    revalidatePath('/Adminhome');
+    return { success: true, user };
+  } catch (error) {
+    return { success: false, error: 'Failed to create user' };
+  }
+}
+
+export async function updateUser(id: string, formData: FormData) {
+  const f_name = formData.get('f_name') as string;
+  const l_name = formData.get('l_name') as string;
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+  const role = formData.get('role') as string;
+
+  try {
+    const updateData: any = {
+      f_name,
+      l_name,
+      email,
+      role,
+    };
+
+    if (password) {
+      updateData.password = await bcrypt.hash(password, 10);
+    }
+
+    const user = await prisma.user.update({
+      where: { id },
+      data: updateData,
+    });
+    revalidatePath('/Adminhome');
+    return { success: true, user };
+  } catch (error) {
+    return { success: false, error: 'Failed to update user' };
+  }
+}
+
+export async function deleteUser(id: string) {
+  try {
+    await prisma.user.delete({
+      where: { id },
+    });
+    revalidatePath('/Adminhome');
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: 'Failed to delete user' };
   }
 }
 
 export async function searchMembers(searchTerm: string) {
   try {
-    if (!searchTerm.trim()) {
-      return [];
-    }
-
+    if (!searchTerm) return [];
+    
     const members = await prisma.fnmember.findMany({
       where: {
         OR: [
-          {
-            first_name: {
-              contains: searchTerm,
-              mode: 'insensitive'
-            }
-          },
-          {
-            last_name: {
-              contains: searchTerm,
-              mode: 'insensitive'
-            }
-          },
-          {
-            t_number: {
-              contains: searchTerm,
-              mode: 'insensitive'
-            }
-          }
-        ]
+          { first_name: { contains: searchTerm, mode: 'insensitive' } },
+          { last_name: { contains: searchTerm, mode: 'insensitive' } },
+          { t_number: { contains: searchTerm, mode: 'insensitive' } },
+          { contact_number: { contains: searchTerm, mode: 'insensitive' } },
+          { email: { contains: searchTerm, mode: 'insensitive' } },
+        ],
       },
-      orderBy: {
-        last_name: 'asc'
+      select: {
+        id: true,
+        created: true,
+        updated: true,
+        birthdate: true,
+        first_name: true,
+        last_name: true,
+        t_number: true,
+        gender: true,
+        o_r_status: true,
+        house_number: true,
+        community: true,
+        contact_number: true,
+        option: true,
+        email: true,
       }
     });
-
-    return members;
-  } catch (e) {
-    console.error('Search error:', e);
-    return [];
-  } finally {
-    await prisma.$disconnect();
+    
+    // Serialize dates before returning
+    return members.map(member => ({
+      ...member,
+      created: member.created.toISOString(),
+      updated: member.updated.toISOString(),
+      birthdate: member.birthdate.toISOString(),
+    }));
+  } catch (error) {
+    console.error('Search error:', error);
+    throw new Error('Failed to search members');
   }
 }
 
-export async function getUsers() {
-  try{
-    return prisma.user.findMany({ orderBy: { id: 'desc' } });
-  }catch(e){
-    console.log(e);
-  }finally{
-    await prisma.$disconnect();
-  }
-}
-
-export async function createUser(data: FormData) {
-  const parsed = userSchema.safeParse(Object.fromEntries(data));
-  if (!parsed.success) {
-    throw new Error('Validation Error');
-  }
-  const { f_name, l_name, email, password, role } = parsed.data;
-
+export async function getItems() {
   try {
-    const result = await prisma.user.create({
-      data: {
-        f_name,
-        l_name,
-        email,
-        password,
-        role,
-      },
+    const items = await prisma.fnmember.findMany({
+      select: {
+        id: true,
+        created: true,
+        updated: true,
+        birthdate: true,
+        first_name: true,
+        last_name: true,
+        t_number: true,
+        gender: true,
+        o_r_status: true,
+        house_number: true,
+        community: true,
+        contact_number: true,
+        option: true,
+        email: true,
+      }
     });
-    return result;
-  } catch (e) {
-    console.error('Error creating item:', e);
-    throw new Error('Failed to create user');
-  } finally {
-    await prisma.$disconnect();
+    return items;
+  } catch (error) {
+    console.error('Error fetching items:', error);
+    throw new Error('Failed to fetch items');
   }
-}
-
-export async function updateUser(id: string, data: FormData) {
-  const parsed = userSchema.safeParse(Object.fromEntries(data));
-  if (!parsed.success) {
-    throw new Error('Validation Error');
-  }
-  const { f_name, l_name, email, password, role, } = parsed.data;
-  const post = await prisma.user.findUnique({ where: { id } });
-  if (!post) {
-    throw new Error('User not found');
-  }
-  return prisma.user.update({ where: { id }, data: { f_name, l_name, email, password, role,  } });
-}
-
-export async function deleteUser(id: string): Promise<void> {
-  const post = await prisma.user.findUnique({ where: { id } });
-  if (!post) {
-    throw new Error('User not found');
-  }
-  await prisma.user.delete({ where: { id } });
 }
