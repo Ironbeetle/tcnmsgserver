@@ -619,34 +619,24 @@ function page(props: any) {
                         <div className="w-full p-2">
                             {isSearching ? (
                                 <div className="text-center text-white py-4">Searching...</div>
-                            ) : searchData?.length === 0 ? (
+                            ) : !searchData || searchData.length === 0 ? (
                                 <div className="text-center text-white py-4">No results found</div>
                             ) : (
                                 <div className="space-y-2">
-                                    {searchData?.map((member: Member) => (
+                                    {searchData.map((member: Member) => (
                                         <div
                                             key={member.id}
                                             className="bg-white bg-opacity-90 rounded-lg p-3 shadow flex justify-between items-center"
+                                            onClick={() => handleSelectMember(member)}
                                         >
                                             <div>
                                                 <div className="font-medium">
                                                     {member.first_name} {member.last_name}
                                                 </div>
                                                 <div className="text-sm text-gray-600">
-                                                    ID: {member.t_number}
-                                                </div>
-                                                <div className="text-sm text-gray-600">
-                                                    Community: {member.community}
+                                                    {member.contact_number}
                                                 </div>
                                             </div>
-                                            <Button
-                                                onClick={() => handleSelectMember(member)}
-                                                disabled={selectedRecipients.some(r => r.id === member.id)}
-                                                variant="outline"
-                                                size="sm"
-                                            >
-                                                {selectedRecipients.some(r => r.id === member.id) ? 'Selected' : 'Select'}
-                                            </Button>
                                         </div>
                                     ))}
                                 </div>
