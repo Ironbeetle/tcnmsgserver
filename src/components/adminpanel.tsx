@@ -366,49 +366,34 @@ function adminpanel(props: any) {
         );
     };
     return (
-        <>           <div className="flex flex-col justify-evenly items-center h-full w-full">
-            <div className="flex flex-row justify-evenly h-1/8 w-full border-b-4 border-white border-solid">
-                <div>
-                    Welcome Admin User
-                </div>
-                <div> 
-                    {new Date().toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                    })}
-                </div>
-            </div>
-            <div className="grid grid-cols-5 w-full h-7/8">
-                <div className="col-span-1 h-full border-r-4 border-white border-solid">
-                    <div className="flex flex-col h-full justify-evenly">
-                        <Button variant="outline" className={activeTab === 1 ? 'active' : ''} onClick={() => setActiveTab(1)}>
-                            <div className="apptextB">
+        <>    
+            <div className="flex flex-col justify-evenly items-center h-full w-full">
+                <div className="grid grid-cols-2 h-1/8 w-full border-b-4 border-white border-solid">
+                    <div className="flex flex-col justify-center items-center">
+                        <Button variant="outline" className={activeTab === 1 ? 'active' : ''} onClick={() => setActiveTab(1)} style={{width:"50%"}}>
+                            <div className="apptext">
                                 Create User
                             </div>
                         </Button>
-                        <Button variant="outline" className={activeTab === 2 ? 'active' : ''} onClick={() => setActiveTab(2)}>
+                      
+                    </div>
+                    <div className="flex flex-col justify-center">
+                       
+                        <Button variant="outline" className={activeTab === 2 ? 'active' : ''} onClick={() => setActiveTab(2)} style={{width:"50%"}}>
                             <div className="apptextB">
                                 Edit User List
                             </div>
                         </Button>
-                        <Button variant="outline" className={activeTab === 3 ? 'active' : ''} onClick={() => setActiveTab(3)}>
-                            <div className="apptextB">
-                                View User Stats
-                            </div>
-                        </Button>
                     </div>
                 </div>
-                <div className="col-span-3 h-full">
-                    {activeTab === 1 && <CreateUser />}
-                    {activeTab === 2 && <EditUser />}
-                    {activeTab === 3 && <ViewUser />}
+                
+                <div className="flex flex-col justify-evenly w-full h-7/8">
+                    <div className="w-1/2 h-full p-6">
+                        {activeTab === 1 && <CreateUser />}
+                        {activeTab === 2 && <EditUser />}
+                    </div>
+                   
                 </div>
-                <div className="col-span-1 h-full border-l-4 border-white border-solid">
-                    User search and select area
-                </div>
-            </div>
            </div>
         </>
     );

@@ -573,14 +573,14 @@ function staffpanel(props: any) {
     return (
         <>
            <div className="flex flex-col justify-evenly items-center h-full w-full">
-                <div className="grid grid-cols-5 w-full h-7/8">
+                <div className="grid grid-cols-5 w-full h-full">
                     <div className="col-span-3 h-full">
                         <div className='flex flex-col items-center justify-center'>
                             {activeTab === 1 && <Messenger/>}
                             {activeTab === 2 && <Messages/>}
                         </div>
                     </div>
-                    <div className="col-span-2 h-full border-l-4 border-white border-solid overflow-y-auto">
+                    <div className="col-span-2 h-full border-l-4 border-white border-solid overflow-y-hidden">
                         <div className="flex flex-col justify-evenly border-b-4 border-white border-solid p-4">
                             <div className="apptextB">
                                 Client Search
@@ -593,14 +593,14 @@ function staffpanel(props: any) {
                                 className="w-full px-3 py-2 mt-2 rounded-md border border-gray-300"
                             />
                         </div>
-                        <div className="w-full p-2">
+                        <div className="w-full p-2 overflow-y-hidden">
                             {isSearching ? (
                                 <div className="text-center text-white py-4">Searching...</div>
                             ) : !searchData || searchData.length === 0 ? (
                                 <div className="text-center text-white py-4">No results found</div>
                             ) : (
                                 <div className="space-y-2">
-                                    {searchData.map((member: Member) => (
+                                    {searchData.slice(0, 7).map((member: Member) => (
                                         <div
                                             key={member.id}
                                             className="bg-white bg-opacity-90 rounded-lg p-3 shadow flex justify-between items-center"
