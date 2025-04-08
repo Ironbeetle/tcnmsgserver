@@ -61,20 +61,20 @@ function adminpanel(props: any) {
 
         return (
             <div className="p-4">
-                <h2 className="text-xl font-bold mb-4">Create New User</h2>
+                <h2 className="text-xl font-bold mb-4 text-gray-200">Create New User</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium">First Name</label>
+                        <label className="block text-md font-medium text-gray-50">First Name</label>
                         <input
                             type="text"
                             value={formData.f_name}
                             onChange={(e) => setFormData({...formData, f_name: e.target.value})}
-                            className="mt-1 block w-full rounded-md border p-2"
+                            className="mt-1 block w-full rounded-md border p-2 "
                             required
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium">Last Name</label>
+                        <label className="block text-md font-medium text-gray-50">Last Name</label>
                         <input
                             type="text"
                             value={formData.l_name}
@@ -84,7 +84,7 @@ function adminpanel(props: any) {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium">Email</label>
+                        <label className="block text-sm font-medium text-gray-50">Email</label>
                         <input
                             type="email"
                             value={formData.email}
@@ -94,7 +94,7 @@ function adminpanel(props: any) {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium">Password</label>
+                        <label className="block text-sm font-medium text-gray-50">Password</label>
                         <input
                             type="password"
                             value={formData.password}
@@ -104,11 +104,11 @@ function adminpanel(props: any) {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium">Role</label>
+                        <label className="block text-sm font-medium text-gray-50">Role</label>
                         <select
                             value={formData.role}
                             onChange={(e) => setFormData({...formData, role: e.target.value})}
-                            className="mt-1 block w-full rounded-md border p-2"
+                            className="mt-1 block w-full rounded-md border p-2 text-gray-50"
                         >
                             <option value="admin">Admin</option>
                             <option value="staff">Staff</option>
@@ -199,13 +199,13 @@ function adminpanel(props: any) {
 
         return (
             <div className="p-4">
-                <h2 className="text-xl font-bold mb-4">Edit User</h2>
+                <h2 className="text-xl font-bold mb-4 text-gray-200">Edit User</h2>
                 
                 {/* User Selection */}
                 <div className="mb-6">
-                    <label className="block text-sm font-medium mb-2">Select User to Edit</label>
+                    <label className="block text-sm font-medium mb-2 text-gray-50">Select User to Edit</label>
                     <select 
-                        className="w-full p-2 border rounded"
+                        className="w-full p-2 border rounded text-gray-50"
                         value={selectedUser || ''}
                         onChange={(e) => setSelectedUser(e.target.value)}
                     >
@@ -221,7 +221,7 @@ function adminpanel(props: any) {
                 {selectedUser && (
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium">First Name</label>
+                            <label className="block text-sm font-medium text-gray-50">First Name</label>
                             <input
                                 type="text"
                                 value={formData.f_name}
@@ -231,7 +231,7 @@ function adminpanel(props: any) {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium">Last Name</label>
+                            <label className="block text-sm font-medium text-gray-50">Last Name</label>
                             <input
                                 type="text"
                                 value={formData.l_name}
@@ -241,7 +241,7 @@ function adminpanel(props: any) {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium">Email</label>
+                            <label className="block text-sm font-medium text-gray-50">Email</label>
                             <input
                                 type="email"
                                 value={formData.email}
@@ -251,7 +251,7 @@ function adminpanel(props: any) {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium">Password</label>
+                            <label className="block text-sm font-medium text-gray-50">Password</label>
                             <input
                                 type="password"
                                 value={formData.password}
@@ -261,7 +261,7 @@ function adminpanel(props: any) {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium">Role</label>
+                            <label className="block text-sm font-medium text-gray-50">Role</label>
                             <select
                                 value={formData.role}
                                 onChange={(e) => setFormData({...formData, role: e.target.value})}

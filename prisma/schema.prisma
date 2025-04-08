@@ -22,7 +22,7 @@ model fnmember {
   last_name      String
   t_number       String
   gender         String
-  o_r_status     String   @default("false")
+  o_r_status     String   @default("On_Reserve")
   house_number   String   @default("0")
   community      String
   contact_number String

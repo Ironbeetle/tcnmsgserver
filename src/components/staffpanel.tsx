@@ -528,25 +528,25 @@ function staffpanel(props: any) {
     const Messenger = () => {
         return (
             <>
-                <div className='flex flex-col items-center justify-center'>
-                    <div className='apptextBlack'>
+                <div className='flex flex-col items-center justify-center pb-6 pt-4'>
+                    <div className='text-white text-3xl'>
                         Message Compose
                     </div>
                 </div>
                 <div className='grid grid-cols-2 w-full border-b-4 border-white border-solid'>
                     <div className='flex flex-row items-center justify-evenly'>
                         <button className={activeTab2 === 1 ? 'active' : ''} onClick={() => setActiveTab2(1)}>
-                            <div className="apptextB">
+                            <div className="text-white text-xl">
                                 Text Msg
                             </div>
                         </button>
                         <button className={activeTab2 === 2 ? 'active' : ''} onClick={() => setActiveTab2(2)}>
-                            <div className="apptextB">
+                            <div className="text-white text-xl">
                                 Notifications
                             </div>
                         </button>
                         <button className={activeTab2 === 3 ? 'active' : ''} onClick={() => setActiveTab2(3)}>
-                            <div className="apptextB">
+                            <div className="text-white text-xl">
                                 Email
                             </div>
                         </button>
@@ -581,8 +581,8 @@ function staffpanel(props: any) {
                         </div>
                     </div>
                     <div className="col-span-2 h-full border-l-4 border-white border-solid overflow-y-hidden">
-                        <div className="flex flex-col justify-evenly border-b-4 border-white border-solid p-4">
-                            <div className="apptextB">
+                        <div className="flex flex-col justify-evenly p-4">
+                            <div className="text-xl font-bold mb-4 text-white">
                                 Client Search
                             </div>
                             <input
