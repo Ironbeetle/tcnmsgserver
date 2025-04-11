@@ -32,19 +32,27 @@ model fnmember {
 }
 // Staff Management
 model User {
-  id            String    @id @default(uuid())
-  created       DateTime  @default(now())
-  updated       DateTime  @default(now()) @updatedAt
-  f_name        String?
-  l_name        String?
-  email         String?   @unique
-  emailVerified DateTime?
-  role          String    @default("admin")
-  password      String
-  accounts      Account[]
-  sessions      Session[]
+  id             String    @id @default(cuid())
+  email          String    @unique
+  contact_number String?
+  first_name     String
+  last_name      String
+  messages        Message[]
+  account        Account[]
+  sessions       Session[]
   @@schema("msgmanager")
 }
+
+model Message {
+  id        String   @id @default(cuid())
+  type      String   // 'sms' or 'email'
+  subject   String?  // for email only
+  message   String
+  created   DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  @@schema("msgmanager")
+  }
 
 model SmsLog {
   id          String   @id @default(uuid())

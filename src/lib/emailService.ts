@@ -1,13 +1,8 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
+import prisma from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 
-// Create reusable transporter
-const transporter = nodemailer.createTransport({
-    service: process.env.EMAIL_SERVICE, // e.g., 'gmail'
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD, // Use app-specific password if using Gmail
-    },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export interface EmailAttachment {
     filename: string;
@@ -26,20 +21,61 @@ export async function sendEmail({
     attachments?: EmailAttachment[];
 }) {
     try {
-        const mailOptions = {
-            from: process.env.EMAIL_FROM,
-            to: to.join(', '),
-            subject,
-            html,
+        const { data, error } = await resend.emails.send({
+            from: 'TCN Message Server <notifications@amontech.ca>',
+            to: to,
+            subject: subject,
+            html: html,
             attachments: attachments.map(attachment => ({
                 filename: attachment.filename,
                 content: attachment.content
             }))
-        };
+        });
 
-        const info = await transporter.sendMail(mailOptions);
-        return { success: true, messageId: info.messageId };
+        if (error) {
+            throw error;
+        }
+
+        const attachmentData = attachments.length > 0 
+            ? {
+                fileCount: attachments.length,
+                fileNames: attachments.map(a => a.filename)
+            }
+            : Prisma.JsonNull;
+
+        // Log successful email
+        await prisma.emailLog.create({
+            data: {
+                subject,
+                message: html,
+                recipients: to,
+                status: 'sent',
+                messageId: data?.id,
+                attachments: attachmentData
+            }
+        });
+
+        return { success: true, messageId: data?.id };
     } catch (error) {
+        const attachmentData = attachments.length > 0 
+            ? {
+                fileCount: attachments.length,
+                fileNames: attachments.map(a => a.filename)
+            }
+            : Prisma.JsonNull;
+
+        // Log failed attempt
+        await prisma.emailLog.create({
+            data: {
+                subject,
+                message: html,
+                recipients: to,
+                status: 'failed',
+                error: error instanceof Error ? error.message : 'Unknown error',
+                attachments: attachmentData
+            }
+        });
+
         console.error('Email sending error:', error);
         throw error;
     }

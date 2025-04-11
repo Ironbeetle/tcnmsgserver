@@ -9,7 +9,7 @@ export default function Home() {
   let [activeTab, setActiveTab] = useState(1);
   return (
     <div className="w-screen h-screen" style={{backgroundColor:"rgba(15, 72, 97, 0.8)"}}>
-      <div className="flex flex-row justify-between items-center h-1/8 w-full border-b-4 border-white border-solid">
+      <div className="flex flex-row justify-between items-center h-1/8 w-full border-b-2 border-white border-solid">
         <div className="text-white text-2xl">
           Welcome Staff User
         </div>
@@ -23,7 +23,7 @@ export default function Home() {
         </div>
       </div>
       <div className="grid grid-cols-5 w-full h-7/8">
-        <div className="col-span-1 h-full border-r-4 border-white border-solid">
+        <div className="col-span-1 h-full border-r-2 border-white border-solid">
           <div className="flex flex-col h-full justify-evenly items-center">
             <Button 
               variant="secondary" 
@@ -45,7 +45,7 @@ export default function Home() {
             </Button>
           </div>
         </div>
-        <div className="col-span-4 h-full border-r-4 border-white border-solid">
+        <div className="col-span-4 h-full">
           <div className="flex flex-col justify-center items-center h-full overflow-y-hidden">
             {activeTab === 1 && <Messenger/>}
             {activeTab === 2 && <Messages/>}

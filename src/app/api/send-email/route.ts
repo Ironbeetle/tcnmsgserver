@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { sendEmail } from '@/lib/emailService';
+import { NotificationTemplate, renderEmailTemplate } from '@/lib/emailTemplates';
 
 export async function POST(request: Request) {
     try {
@@ -29,9 +30,12 @@ export async function POST(request: Request) {
             })
         );
 
-        // Filter recipients with valid email addresses
+        // Filter and validate email addresses
         const validRecipients = recipients
-            .filter((recipient: any) => recipient.email)
+            .filter((recipient: any) => {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return recipient.email && emailRegex.test(recipient.email);
+            })
             .map((recipient: any) => recipient.email);
 
         if (validRecipients.length === 0) {
@@ -41,11 +45,17 @@ export async function POST(request: Request) {
             );
         }
 
+        // Render email template
+        const htmlContent = renderEmailTemplate({
+            title: subject,
+            message: message
+        });
+
         // Send email
         const result = await sendEmail({
             to: validRecipients,
             subject,
-            html: message, // You might want to add HTML formatting here
+            html: await htmlContent,
             attachments
         });
 
